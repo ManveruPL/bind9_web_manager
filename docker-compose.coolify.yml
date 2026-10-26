@@ -1,0 +1,30 @@
+services:
+  bind9-web-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bind9-web-manager
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+      - DNS_MASTER_HOST=host.docker.internal
+      - DNS_MASTER_IP=192.168.35.3
+      - ZONES_PATH=/etc/bind/zones
+      - NAMED_CONF_LOCAL=/etc/bind/named.conf.local
+      - RNDC_KEY_PATH=/etc/bind/rndc.key
+      - DATABASE_URL=sqlite:////app/data/dns_manager.db
+    volumes:
+      - /etc/bind:/etc/bind
+      - dns_manager_data:/app/data
+    networks:
+      - coolify
+
+volumes:
+  dns_manager_data:
+
+networks:
+  coolify:
+    external: true

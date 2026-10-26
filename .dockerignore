@@ -1,0 +1,8 @@
+node_modules
+frontend/dist
+frontend/node_modules
+web-manager/venv
+web-manager/__pycache__
+web-manager/data
+.git
+.env

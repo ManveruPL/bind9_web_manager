@@ -25,7 +25,8 @@ class DNSService:
 
     def _run_rndc(self, *args) -> Tuple[bool, str]:
         """Execute RNDC command"""
-        cmd = ['/usr/sbin/rndc', '-s', self.dns_master, '-k', self.rndc_key] + list(args)
+        rndc_path = shutil.which('rndc') or '/usr/sbin/rndc'
+        cmd = [rndc_path, '-s', self.dns_master, '-k', self.rndc_key] + list(args)
         try:
             result = subprocess.run(
                 cmd,
@@ -147,7 +148,7 @@ class DNSService:
                 content_no_comments = re.sub(r'//.*$', '', content, flags=re.MULTILINE)
 
                 # Parse zones using regex
-                zone_pattern = r'zone\s+"([^"]+)"\s*\{[^}]*?type\s+master[^}]*?file\s+"([^"]+)"'
+                zone_pattern = r'zone\s+"([^"]+)"(?:\s+IN)?\s*\{[^}]*?type\s+master[^}]*?file\s+"([^"]+)"'
                 matches = re.findall(zone_pattern, content_no_comments, re.DOTALL | re.IGNORECASE)
 
                 for zone_name, zone_file in matches:
@@ -430,7 +431,7 @@ zone "{zone_name}" {{
                 config_content = f.read()
 
             # Remove zone block using regex
-            pattern = rf'\n*zone\s+"{re.escape(zone_name)}"\s*\{{[\s\S]*?^\}};\s*'
+            pattern = rf'\n*zone\s+"{re.escape(zone_name)}"(?:\s+IN)?\s*\{{[\s\S]*?^\}};\s*'
             new_content = re.sub(pattern, '\n', config_content, flags=re.MULTILINE)
 
             # Verify zone was removed
