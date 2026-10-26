@@ -1,3 +1,48 @@
+# BIND9 Web Manager — Coolify & Containerized Deployment
+
+> [!NOTE]
+> This fork adds containerized deployment support for [Coolify](https://coolify.io) and Docker Compose while seamlessly controlling an existing native host BIND9 DNS installation. See the full plan and details in [COOLIFY_DEPLOYMENT_PLAN.md](COOLIFY_DEPLOYMENT_PLAN.md).
+
+## What's New in this Fork
+
+- **Multi-Stage Containerized Image (`Dockerfile`)**: Combines a Node.js 20 build stage for the Vite + React frontend SPA with a Python 3.11 slim runtime containing Gunicorn, Nginx, Supervisor, `bind9-utils` (`rndc`, `named-checkzone`), and `bind9-dnsutils` (`dig`).
+- **Internal Reverse Proxy & Supervisor**:
+  - `docker/nginx.conf`: Serves React static SPA routing with fallback and reverse-proxies `/api` and `/health` requests to Gunicorn.
+  - `docker/supervisord.conf`: Supervises both Gunicorn (API server) and Nginx in a single container.
+- **Coolify & Docker Compose Support**:
+  - `docker-compose.coolify.yml` and `docker-compose.yaml`: Configured for deployment on Coolify with the external `coolify` network, volume mounts for host BIND9 (`/etc/bind:/etc/bind`), and persistent SQLite storage (`dns_manager_data:/app/data`).
+- **Debian BIND9 Compatibility Fixes**:
+  - Fixed zone parsing regexes in `web-manager/services/dns_service.py` (`get_zones()` and `delete_zone()`) to support standard zone declarations containing the `IN` keyword (e.g. `zone "example.com" IN { ... }`).
+  - Robust `rndc` binary lookup (`shutil.which('rndc') or '/usr/sbin/rndc'`).
+  - Added support for BIND9 remote control listening across the Docker network gateway (`10.0.1.1`).
+
+### Quick Deployment via Coolify
+
+1. **Host Setup (`/etc/bind/named.conf`)**:
+   Add a `controls` block to permit RNDC commands from the Coolify Docker gateway (`10.0.1.1`):
+   ```bind
+   include "/etc/bind/rndc.key";
+
+   controls {
+       inet 127.0.0.1 port 953 allow { 127.0.0.1; } keys { "rndc-key"; };
+       inet 10.0.1.1 port 953 allow { 10.0.0.0/16; 127.0.0.1; } keys { "rndc-key"; };
+   };
+   ```
+   Reload BIND: `rndc reload`.
+
+2. **Coolify Application Setup**:
+   - Add new resource from Git: `https://github.com/ManveruPL/bind9_web_manager.git` (branch `main`).
+   - In **Storages**, add:
+     - Host Path `/etc/bind` -> Destination `/etc/bind`
+     - Volume `dns_manager_data` -> Destination `/app/data`
+   - Or set Build Pack to **Docker Compose** pointing to `docker-compose.yaml`.
+   - Set environment variable `FLASK_SECRET_KEY` (e.g. random 64-character hex string).
+   - Deploy.
+
+---
+
+# Original Documentation
+
 <div align="center">
 
 <img src="images/logo.png" width="96" alt="PRIVUM DNS Manager logo — a blue globe with meridian lines">
