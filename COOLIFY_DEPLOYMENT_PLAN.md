@@ -62,8 +62,9 @@ RUN npm run build
 # ==========================================
 FROM python:3.11-slim-bookworm
 
-# Install rndc, named-checkzone, nginx, and supervisor
+# Install rndc, named-checkzone, dig, nginx, and supervisor
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    bind9-utils \
     bind9-dnsutils \
     nginx \
     supervisor \
