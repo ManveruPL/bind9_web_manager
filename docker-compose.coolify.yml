@@ -10,7 +10,7 @@ services:
     environment:
       - FLASK_ENV=production
       - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
-      - DNS_MASTER_HOST=host.docker.internal
+      - DNS_MASTER_HOST=10.0.1.1
       - DNS_MASTER_IP=192.168.35.3
       - ZONES_PATH=/etc/bind/zones
       - NAMED_CONF_LOCAL=/etc/bind/named.conf.local

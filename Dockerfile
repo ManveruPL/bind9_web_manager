@@ -43,6 +43,8 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ENV FLASK_ENV=production
 ENV DOCKER_CONTAINER=true
 ENV PYTHONUNBUFFERED=1
+ENV DNS_MASTER_HOST=10.0.1.1
+ENV DNS_MASTER_IP=192.168.35.3
 ENV ZONES_PATH=/etc/bind/zones
 ENV NAMED_CONF_LOCAL=/etc/bind/named.conf.local
 ENV RNDC_KEY_PATH=/etc/bind/rndc.key
