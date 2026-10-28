@@ -97,12 +97,12 @@ export default function Login() {
           )}
           <div className="space-y-2">
             <label htmlFor="username" className="text-sm font-medium">
-              Username
+              Username or Email
             </label>
             <Input
               id="username"
               type="text"
-              placeholder="Enter your username"
+              placeholder="Enter your username or email"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required

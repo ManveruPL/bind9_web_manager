@@ -176,7 +176,8 @@ def login():
     if not username or not password:
         return jsonify({'error': 'Username and password required'}), 400
 
-    user = User.get_by_username(username)
+    # Support login with either username or email
+    user = User.get_by_username(username) or User.get_by_email(username)
 
     if not user:
         audit_log('login_failed', 'auth', username, new_value={'reason': 'user_not_found'})
